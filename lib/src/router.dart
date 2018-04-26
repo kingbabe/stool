@@ -11,6 +11,8 @@ class Route {
   const Route.DELETE(String path) : this(path, 'DELETE');
   const Route.OPTION(String path) : this(path, 'OPTION');
   const Route.PUT(String path) : this(path, 'PUT');
+  const Route.REDIRECT(String path) : this(path, 'REDIRECT');
+  const Route.HEAD(String path) : this(path, 'HEAD');
 
   String toString() => '$method:$path';
 }
