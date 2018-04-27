@@ -1,5 +1,6 @@
 import 'dart:mirrors';
-import 'dart:async';
+import 'tools/path_to_regex.dart';
+
 /// route annotation
 class Route {
   final String path;
@@ -13,6 +14,7 @@ class Route {
   const Route.PUT(String path) : this(path, 'PUT');
   const Route.REDIRECT(String path) : this(path, 'REDIRECT');
   const Route.HEAD(String path) : this(path, 'HEAD');
+  const Route.ALL(String path) : this(path, 'ALL');
 
   String toString() => '$method:$path';
 }
@@ -28,7 +30,7 @@ class Router {
   /// private constructor
   Router._internal();
 
-  Map<String, Map<String, Symbol>> router = {};
+  Map<String, Map<PathToRegex, Symbol>> router = {};
   Map<String, Object> _controllers = {};
 
   /// use this regex to judge if a function is async function
@@ -40,7 +42,7 @@ class Router {
     _controllers[path] = controllerIns;
 
     var klass = reflectClass(controllerIns.runtimeType);
-    Map<String, Symbol> controllerMethodMap = {};
+    Map<PathToRegex, Symbol> controllerMethodMap = {};
     klass.declarations.forEach((Symbol symbol, DeclarationMirror declare) {
       if (declare is MethodMirror) {
         MethodMirror method = declare;
@@ -50,12 +52,13 @@ class Router {
             method.source.contains(_asyncFuncRegex)) {
           Route routeAnnotation = _getAnnotation(method, Route);
           if (routeAnnotation != null) {
-            controllerMethodMap[routeAnnotation.toString()] = method.simpleName;
+            controllerMethodMap[new PathToRegex(routeAnnotation.path, routeAnnotation.method)] = method.simpleName;
           }
         }
       }
     });
     router[path] = controllerMethodMap;
+    print('[Stool Initializing] controller ${controllerIns.runtimeType} for route \'$path\' loaded');
   }
 
   /// get annotation for controller route method

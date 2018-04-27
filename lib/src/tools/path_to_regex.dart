@@ -7,12 +7,14 @@ const PatternReplace = '/([a-z0-9]*)';
 class PathToRegex {
 
   String path;
+  String method;
   List<String> paramName = [];
   bool containsPathParam = false;
   RegExp pattern;
 
-  PathToRegex(path) {
+  PathToRegex(String path, String method) {
     this.path = path;
+    this.method = method;
     _searchParamPatterns();
   }
 
@@ -33,7 +35,10 @@ class PathToRegex {
   }
 
   /// judge if given path full matches this patter
-  bool match(Uri url) {
+  bool match(Uri url, String method) {
+    if (this.method != method && method != 'ALL') {
+      return false;
+    }
     Iterable<Match> matches = this.pattern.allMatches(url.path);
     if (matches.length == 0) {
       return false;
