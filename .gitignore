@@ -1,3 +1,5 @@
 .idea/
 *.iml
+pubspec.lock
+.packages
 example/example.dart

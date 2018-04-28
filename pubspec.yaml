@@ -3,5 +3,7 @@ version: 0.0.1
 author: stephenwzl<stephenwzlwork@gmail.com>
 description: web server framework for Dart
 homepage: https://github.com/stephenwzl/stool
+dependencies:
+  path: "^1.5.1"
 environment:
   sdk: '>=1.24.0 <2.0.0'

@@ -1,12 +1,16 @@
 import 'dart:mirrors';
+import 'package:path/path.dart' as Path;
+
 import 'tools/path_to_regex.dart';
+import 'tools/annotations.dart';
+import 'controller.dart';
 
 /// route annotation
 class Route {
   final String path;
   final String method;
   /// define a route
-  const Route(this.path, this.method);
+  const Route(this.path, [this.method]);
   const Route.GET(String path) : this(path, 'GET');
   const Route.POST(String path) : this(path, 'POST');
   const Route.DELETE(String path) : this(path, 'DELETE');
@@ -20,18 +24,21 @@ class Route {
 }
 
 
-class Router {
-  static final Router _instance = new Router._internal();
+class StoolRouter {
+  static final StoolRouter _instance = new StoolRouter._internal();
 
-  factory Router() {
+  factory StoolRouter() {
     return _instance;
   }
 
   /// private constructor
-  Router._internal();
+  StoolRouter._internal();
 
   Map<String, Map<PathToRegex, Symbol>> router = {};
-  Map<String, Object> _controllers = {};
+  Map<String, StoolController> _controllers = {};
+
+  Map<String, StoolController> get controllers => _controllers;
+  Map<PathToRegex, Symbol> getControllerMap(String path) => router[path];
 
   /// use this regex to judge if a function is async function
   RegExp _asyncFuncRegex = new RegExp('async\ *\n*{');
@@ -50,26 +57,19 @@ class Router {
             !method.isAbstract &&
             !method.isOperator &&
             method.source.contains(_asyncFuncRegex)) {
-          Route routeAnnotation = _getAnnotation(method, Route);
+          Route routeAnnotation = GetAnnotation(method, Route);
           if (routeAnnotation != null) {
-            controllerMethodMap[new PathToRegex(routeAnnotation.path, routeAnnotation.method)] = method.simpleName;
+            controllerMethodMap[new PathToRegex(Path.join(path, routeAnnotation.path), routeAnnotation.method)] = method.simpleName;
           }
         }
       }
     });
     router[path] = controllerMethodMap;
-    print('[Stool Initializing] controller ${controllerIns.runtimeType} for route \'$path\' loaded');
+    print('[Stool Router] controller ${controllerIns.runtimeType} for route \'$path\' loaded');
   }
 
-  /// get annotation for controller route method
-  dynamic _getAnnotation(MethodMirror method, Type annotationType) {
-    for (var ins in method.metadata) {
-      if (ins.hasReflectee) {
-        if (ins.reflectee.runtimeType == annotationType) {
-          return ins.reflectee;
-        }
-      }
-    }
-    return null;
+
+  Symbol handlerForRequest(Uri uri) {
+
   }
 }
